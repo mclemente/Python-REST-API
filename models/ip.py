@@ -1,8 +1,6 @@
 from flask_restful import Resource, reqparse
 from sql_alchemy import banco
 
-ips = []
-
 class IpModel:
     __tablename__ = 'ips'
 
@@ -22,45 +20,28 @@ class IpModel:
             'whitelist': self.whitelist
         }
 
-class IPS (Resource):
-    def get(self):
-        return {'ips': ips}
-    
-class IP (Resource):
-    args = reqparse.RequestParser()
-    args.add_argument('ip')
-    args.add_argument('whitelist')
-
-    def acha_ip(ip_id):
-        for ip in ips:
-            if (ip['ip_id'] == ip_id):
-                return ip
-        return None
-
-    def get(self, ip_id):
-        ip = IP.acha_ip(ip_id)
+    @classmethod
+    def find_ip(cls, ip_id):
+        ip = cls.query.filter_by(ip_id = ip_id).first # SELECT * FROM ips WHERE ip_id = $ip_id
         if ip:
             return ip
-        return {'message': 'IP não encontrado'}, 404
-
-    def post(self, ip_id):
-        dados = IP.args.parse_args()
-        novo_ip = IpModel(ip_id, **dados).json()
-        ips.append(novo_ip)
-        return novo_ip, 200
-
-    def put(self, ip_id):
-        ip = IP.acha_ip(ip_id)
-        dados = IP.args.parse_args()
-
-        novo_ip = IpModel(ip_id, **dados).json()
-        if ip:
-            ip.update(novo_ip)
-            return novo_ip, 200
-        ips.append(novo_ip)
-        return novo_ip, 201
-
-    def delete(self, ip_id):
-        global ips
-        ips = [ip for ip in ips if ip['ip_id'] != ip_id]
-        return {'message': 'IP deleted'}
+        return None
+    
+    @classmethod
+    def find_ip_by_ip(cls, ip):
+        ip = cls.query.filter_by(ip = ip).first # SELECT * FROM ips WHERE ip = $ip
+        if (ip):
+            return ip
+        return None
+    
+    def save_ip(self):
+        banco.session.add(self)
+        banco.session.commit()
+    
+    def update_ip(self, ip_id, ip, whitelist):
+        self.ip = ip
+        self.whitelist = whitelist
+    
+    def delete_ip(self):
+        banco.session.delete(self)
+        banco.session.commit()
