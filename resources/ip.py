@@ -8,38 +8,35 @@ class IPS (Resource):
     
 class IP (Resource):
     args = reqparse.RequestParser()
-    args.add_argument('ip')
     
-    def get(self, ip_id):
-        ip = IpModel.find_ip(ip_id)
-        if ip:
-            return ip.json()
+    def get(self, ip):
+        _ip = IpModel.find_ip(ip)
+        if _ip:
+            return _ip.json()
         return {'message': 'IP não encontrado'}, 404
 
-    def post(self, ip_id):
-        if IpModel.find_ip(ip_id):
-            return {'message': 'ID {} já existe.'.format(ip_id)}, 400
+    def post(self, ip):
+        if IpModel.find_ip(ip):
+            return {'message': 'IP {} já consta no banco de dados.'.format(ip)}, 400
         dados = IP.args.parse_args()
-        ip = IpModel(ip_id, **dados)
-        if IpModel.find_ip_by_ip(ip.json()['ip']):
-            return {'message': 'IP {} já consta no banco de dados.'.format(ip['ip'])}, 400
-        ip.save_ip()
-        return ip.json(), 200
+        _ip = IpModel(ip)
+        _ip.save_ip()
+        return _ip.json(), 200
 
-    def put(self, ip_id):
+    def put(self, ip):
         dados = IP.args.parse_args()
-        ip_encontrado = IpModel.find_ip(ip_id)
+        ip_encontrado = IpModel.find_ip(ip)
         if ip_encontrado:
             ip_encontrado.update_ip(**dados)
             ip_encontrado.save_ip()
             return ip_encontrado.json(), 200
-        ip = IpModel(ip_id, **dados)
-        ip.save_ip()
-        return ip.json(), 201
+        _ip = IpModel(ip, **dados)
+        _ip.save_ip()
+        return _ip.json(), 201
 
-    def delete(self, ip_id):
-        ip = IpModel.find_ip_by_ip(ip_id)
-        if ip:
-            ip.delete_ip()
+    def delete(self, ip):
+        _ip = IpModel.find_ip_by_ip(ip)
+        if _ip:
+            _ip.delete_ip()
             return {'message': 'IP deleted.'}
         return {'message': 'IP not found.'}, 404

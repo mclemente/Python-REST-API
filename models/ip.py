@@ -4,11 +4,10 @@ from sql_alchemy import banco
 class IpModel(banco.Model):
     __tablename__ = 'ips'
 
-    ip_id = banco.Column(banco.String, primary_key = True)
+    ip_id = banco.Column(banco.Integer, primary_key = True, autoincrement=True)
     ip = banco.Column(banco.String(80))
 
-    def __init__(self, ip_id, ip):
-        self.ip_id = ip_id
+    def __init__(self, ip):
         self.ip = ip
     
     def json(self):
@@ -18,24 +17,17 @@ class IpModel(banco.Model):
         }
 
     @classmethod
-    def find_ip(cls, ip_id):
-        ip = cls.query.filter_by(ip_id = ip_id).first() # SELECT * FROM ips WHERE ip_id = $ip_id
+    def find_ip(cls, ip):
+        ip = cls.query.filter_by(ip = ip).first() # SELECT * FROM ips WHERE ip = $ip
         if ip:
             return ip
-        return None
-
-    @classmethod
-    def find_ip_by_ip(cls, ip):
-        _ip = cls.query.filter_by(ip = ip).first() # SELECT * FROM ips WHERE ip_id = $ip_id
-        if _ip:
-            return _ip
         return None
     
     def save_ip(self):
         banco.session.add(self)
         banco.session.commit()
     
-    def update_ip(self, ip_id, ip):
+    def update_ip(self, ip):
         self.ip = ip
     
     def delete_ip(self):
