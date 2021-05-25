@@ -1,42 +1,65 @@
 from flask_restful import Resource, reqparse
 from sql_alchemy import banco
-from models.ip import IpModel
+from models.ip import IpModel, WhitelistModel
+import requests
 
-class IPS (Resource):
+class Filtro (Resource):
+    def get(self):
+        filter = banco.session.query(IpModel, WhitelistModel).filter(IpModel.ip != WhitelistModel.ip).all() # SELECT * FROM ips, whitelist WHERE ips.ip != whitelist.ip
+        if (len(filter)):
+            rows = {}
+            i = 0
+            for row in filter:
+                rows[i] = dict(row)['IpModel'].json()
+                i += 1
+        else:
+            rows = {'ips': [ip.json() for ip in IpModel.query.all()]} # SELECT * FROM ips
+        return rows
+
+class Blacklist (Resource):
+    args = reqparse.RequestParser()
+
     def get(self):
         return {'ips': [ip.json() for ip in IpModel.query.all()]} # SELECT * FROM ips
     
-class IP (Resource):
+    def post(self):
+        tornodes = requests.get("https://www.dan.me.uk/torlist/")
+        if tornodes.status_code == 200:
+            for ip in tornodes.text().split("\n"):
+                if IpModel.find_ip(ip):
+                    continue
+                _ip = IpModel(ip)
+                _ip.save_ip()
+        onionoo = requests.get("https://onionoo.torproject.org/summary?limit=5000")
+        if onionoo.status_code == 200:
+            for ip in onionoo.json()["relays"]["a"][0]:
+                if IpModel.find_ip(ip):
+                    continue
+                _ip = IpModel(ip)
+                _ip.save_ip()
+        return 200
+
+class Whitelist (Resource):
     args = reqparse.RequestParser()
+    # args.add_argument('ip')
+    
+    def get(self):
+        return {'ips': [ip.json() for ip in WhitelistModel.query.all()]} # SELECT * FROM whitelist
+
+class WhitelistIP (Resource):
+    args = reqparse.RequestParser()
+    # args.add_argument('ip')
     
     def get(self, ip):
-        _ip = IpModel.find_ip(ip)
+        _ip = WhitelistModel.find_ip(ip)
         if _ip:
             return _ip.json()
         return {'message': 'IP não encontrado'}, 404
 
     def post(self, ip):
-        if IpModel.find_ip(ip):
+        if WhitelistModel.find_ip(ip):
             return {'message': 'IP {} já consta no banco de dados.'.format(ip)}, 400
-        dados = IP.args.parse_args()
-        _ip = IpModel(ip)
+        dados = WhitelistIP.args.parse_args()
+        _ip = WhitelistModel(ip)
         _ip.save_ip()
         return _ip.json(), 200
-
-    def put(self, ip):
-        dados = IP.args.parse_args()
-        ip_encontrado = IpModel.find_ip(ip)
-        if ip_encontrado:
-            ip_encontrado.update_ip(**dados)
-            ip_encontrado.save_ip()
-            return ip_encontrado.json(), 200
-        _ip = IpModel(ip, **dados)
-        _ip.save_ip()
-        return _ip.json(), 201
-
-    def delete(self, ip):
-        _ip = IpModel.find_ip_by_ip(ip)
-        if _ip:
-            _ip.delete_ip()
-            return {'message': 'IP deleted.'}
-        return {'message': 'IP not found.'}, 404
