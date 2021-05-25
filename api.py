@@ -4,7 +4,7 @@ from resources.ip import Blacklist, Filtro, Whitelist, WhitelistIP
 from sql_alchemy import banco
 
 app = flask.Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////banco.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['DEBUG'] = True
 
@@ -18,7 +18,8 @@ api.add_resource(Filtro, '/filtro')
 def cria_banco():
     banco.create_all()
 
+banco.init_app(app)
+
 if __name__ == '__main__':
-    from sql_alchemy import banco
     banco.init_app(app)
     app.run()
