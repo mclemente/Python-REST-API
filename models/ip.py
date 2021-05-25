@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
 from sql_alchemy import banco
 
-class IpModel:
+class IpModel(banco.Model):
     __tablename__ = 'ips'
 
     ip_id = banco.Column(banco.String, primary_key = True)

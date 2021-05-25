@@ -1,6 +1,6 @@
 import flask
 from flask_restful import Resource, Api
-from models.ip import IPS, IP
+from resources.ip import IPS, IP
 from sql_alchemy import banco
 
 app = flask.Flask(__name__)
