@@ -6,41 +6,37 @@ class IpModel(banco.Model):
 
     ip_id = banco.Column(banco.String, primary_key = True)
     ip = banco.Column(banco.String(80))
-    whitelist = banco.Column(banco.Boolean())
 
-    def __init__(self, ip_id, ip, whitelist):
+    def __init__(self, ip_id, ip):
         self.ip_id = ip_id
         self.ip = ip
-        self.whitelist = whitelist
     
     def json(self):
         return {
             'ip_id': self.ip_id,
-            'ip': self.ip,
-            'whitelist': self.whitelist
+            'ip': self.ip
         }
 
     @classmethod
     def find_ip(cls, ip_id):
-        ip = cls.query.filter_by(ip_id = ip_id).first # SELECT * FROM ips WHERE ip_id = $ip_id
+        ip = cls.query.filter_by(ip_id = ip_id).first() # SELECT * FROM ips WHERE ip_id = $ip_id
         if ip:
             return ip
         return None
-    
+
     @classmethod
     def find_ip_by_ip(cls, ip):
-        ip = cls.query.filter_by(ip = ip).first # SELECT * FROM ips WHERE ip = $ip
-        if (ip):
-            return ip
+        _ip = cls.query.filter_by(ip = ip).first() # SELECT * FROM ips WHERE ip_id = $ip_id
+        if _ip:
+            return _ip
         return None
     
     def save_ip(self):
         banco.session.add(self)
         banco.session.commit()
     
-    def update_ip(self, ip_id, ip, whitelist):
+    def update_ip(self, ip_id, ip):
         self.ip = ip
-        self.whitelist = whitelist
     
     def delete_ip(self):
         banco.session.delete(self)

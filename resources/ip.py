@@ -4,12 +4,11 @@ from models.ip import IpModel
 
 class IPS (Resource):
     def get(self):
-        return {'ips': [hotel.json() for hotel in IpModel.query.all()]} # SELECT * FROM ips
+        return {'ips': [ip.json() for ip in IpModel.query.all()]} # SELECT * FROM ips
     
 class IP (Resource):
     args = reqparse.RequestParser()
     args.add_argument('ip')
-    args.add_argument('whitelist')
     
     def get(self, ip_id):
         ip = IpModel.find_ip(ip_id)
@@ -21,8 +20,8 @@ class IP (Resource):
         if IpModel.find_ip(ip_id):
             return {'message': 'ID {} já existe.'.format(ip_id)}, 400
         dados = IP.args.parse_args()
-        ip = IpModel(ip_id, **dados).json()
-        if IpModel.find_ip_by_ip(ip['ip']):
+        ip = IpModel(ip_id, **dados)
+        if IpModel.find_ip_by_ip(ip.json()['ip']):
             return {'message': 'IP {} já consta no banco de dados.'.format(ip['ip'])}, 400
         ip.save_ip()
         return ip.json(), 200
