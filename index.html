@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>API</title>
+
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<meta content="utf-8" http-equiv="encoding">
+	</head>
+	<body>
+		<div style="margin-left: auto; margin-right:auto; width: 8em; margin-top: 16em;">
+			<select name="function" id="function" onchange="toggleInput()">
+			  <option value="getBlacklist">Ver Blacklist</option>
+			  <option value="getWhitelist">Ver Whitelist</option>
+			  <option value="postWhitelist" placeholder="ex: 10.0.0.1">Adicionar à Whitelist</option>
+			  <option value="getFilter">Ver Filtro</option>
+			</select>
+			<input type="text" id="input" hidden />
+			<button id="button">Enviar</button>
+
+			<pre id="output"></pre>
+		</div>
+
+		<script src="index.js"></script>
+	</body>
+</html>
